@@ -192,7 +192,7 @@ f_install(){
 if [ ! -e /tmp/smbexec-inst/ ]; then mkdir /tmp/smbexec-inst/; fi
 
 	while [[ $valid != 1 ]]; do
-		if [-z noninteract]; then
+		if [ -z $noninteract ]; then
 			read -e -p "Please provide the path you'd like to place the smbexec folder. [/opt] : " smbexecpath
 			if [ -z $smbexecpath ]; then
 				smbexecpath="/opt"
@@ -451,7 +451,7 @@ done
 
 f_interread(){
  # This suppreses requests for user inout if u is set 
-if [ -z noninteract]; then
+if [ -z $noninteract]; then
   read;
 else
  echo;
