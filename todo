@@ -1,0 +1,10 @@
+= Short term =
+ * Fix install Bugs 
+ * Look into getting working on rolling
+
+=Mid term =
+ * replace WCE with something nicer
+ * Rework hashdump to evade AV
+
+= Long Term = 
+ * Add moar powershell
