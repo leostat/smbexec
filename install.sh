@@ -181,7 +181,7 @@ f_microsoft(){
 	echo " :::::::::::::::88:.__..:88888:::::::::::'" 
 	echo "  \`'.:::::::::::88888888888.88:::::::::'" 
 	echo "        \`':::_:' -- '' -'-' \`':_::::'\` "
-
+	exit;
 
 	f_mainmenu
 }
@@ -386,8 +386,11 @@ fi
 f_compilesmbclient
 f_compilewinexe
 rm -rf /tmp/smbexec-inst/
-
-f_mainmenu
+if [ -z $noninteract ]; then
+	f_mainmenu
+else 
+	exit;
+fi
 }
 
 ##################################################
