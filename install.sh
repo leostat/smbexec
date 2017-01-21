@@ -3,6 +3,7 @@
 # Last updated 09/08/2013
 
 ##################################################
+
 f_debian(){
 	clear
 	f_Banner
@@ -10,7 +11,7 @@ f_debian(){
 
 	echo -e "\n\e[1;34m[*]\e[0m Installing pre-reqs for Debian/Ubuntu...\n"
 
-	if [ ! -e /etc/lsb-release ] && [ ! -e /etc/issue ]; then echo -n -e "\e[1;31m[!]\e[0m I can't confirm this is a Debian\Ubuntu machine. Installs may fail."; read; fi
+	if [ ! -e /etc/lsb-release ] && [ ! -e /etc/issue ]; then echo -n -e "\e[1;31m[!]\e[0m I can't confirm this is a Debian\Ubuntu machine. Installs may fail."; fi
 
 	echo -e "\e[1;34m[*]\e[0m Running 'updatedb' if it fails then install 'locate' from repos and try again\n"
 	updatedb
@@ -91,7 +92,7 @@ f_rhfedora(){
 
         echo -e "\n\e[1;34m[*]\e[0m Installing pre-reqs for Red Hat/Fedora...\n"
 
-	if [ ! -e /etc/redhat-release ]; then echo -n -e "\e[1;31m[!]\e[0m I can't confirm this is a Red Hat/Fedora machine. Installs may fail."; read; fi
+	if [ ! -e /etc/redhat-release ]; then echo -n -e "\e[1;31m[!]\e[0m I can't confirm this is a Red Hat/Fedora machine. Installs may fail."; f_interread; fi
 
 	echo -e "\e[1;34m[*]\e[0m Running 'updatedb', if it fails install 'locate' from repos and try again\n"
 	updatedb
@@ -181,7 +182,6 @@ f_microsoft(){
 	echo "  \`'.:::::::::::88888888888.88:::::::::'" 
 	echo "        \`':::_:' -- '' -'-' \`':_::::'\` "
 
-	read
 
 	f_mainmenu
 }
@@ -192,14 +192,19 @@ f_install(){
 if [ ! -e /tmp/smbexec-inst/ ]; then mkdir /tmp/smbexec-inst/; fi
 
 	while [[ $valid != 1 ]]; do
-		read -e -p "Please provide the path you'd like to place the smbexec folder. [/opt] : " smbexecpath
-		if [ -z $smbexecpath ]; then
+		if [-z noninteract]; then
+			read -e -p "Please provide the path you'd like to place the smbexec folder. [/opt] : " smbexecpath
+			if [ -z $smbexecpath ]; then
+				smbexecpath="/opt"
+				valid=1
+			elif [ -e $smbexecpath ]; then
+				valid=1
+			else
+				echo "Not a valid file path."
+			fi
+		else 
 			smbexecpath="/opt"
 			valid=1
-		elif [ -e $smbexecpath ]; then
-			valid=1
-		else
-			echo "Not a valid file path."
 		fi
 	done
 
@@ -260,7 +265,7 @@ else
 	update=1
 	echo -e "\n\e[1;34m[*]\e[0m Downloading libesedb from authors google docs drive..."
 	sleep 2
-	wget --no-check-certificate https://googledrive.com/host/0B3fBvzttpiiSN082cmxsbHB0anc/libesedb-alpha-20120102.tar.gz -O /tmp/smbexec-inst/libesedb-alpha-20120102.tar.gz
+	wget --no-check-certificate http://pkgs.fedoraproject.org/repo/pkgs/libesedb/libesedb-alpha-20120102.tar.gz/198a30c98ca1b3cb46d10a12bef8deaf/libesedb-alpha-20120102.tar.gz -O /tmp/smbexec-inst/libesedb-alpha-20120102.tar.gz
 	tar -zxf /tmp/smbexec-inst/libesedb-alpha-20120102.tar.gz -C /tmp/smbexec-inst/
 	currentpath=$PWD
 	echo -e "\n\e[1;34m[*]\e[0m Compiling esedbtools..."
@@ -374,15 +379,14 @@ fi
 ##################################################
 f_compilebinaries(){
 path=$PWD
-echo -e "\nThis script will compile your smbexec binaries\nPress any key to continue"
-read
+echo -e "\nThis script will compile your smbexec binaries"
 if [ ! -e /tmp/smbexec-inst ]; then
  mkdir /tmp/smbexec-inst/
 fi
 f_compilesmbclient
 f_compilewinexe
-updatedb
 rm -rf /tmp/smbexec-inst/
+
 f_mainmenu
 }
 
@@ -423,6 +427,40 @@ f_Banner
 if [ "$(id -u)" != "0" ]; then
 	echo -e "\e[1;31m[!]\e[0m This script must be run as root" 1>&2
 	exit 1
+fi
+echo "Updatedb: may take a few seconds"
+updatedb;
+echo "done;"
+
+while getopts "h?vdu:" opt; do
+	case "$opt" in
+		h|\?) 
+			show_usage
+			;;
+		v)
+			show_version
+			;;
+		d)
+			DEBUG=1
+			;;
+		u)
+			noninteract=1
+			;;
+	esac
+done
+
+f_interread(){
+ # This suppreses requests for user inout if u is set 
+if [ -z noninteract]; then
+  read;
 else
-	f_mainmenu
+ echo;
+fi 
+}
+
+if [-z noninteract]; then
+	if_mainmenu;
+else 
+	f_debian;
+	f_compilebinaries;
 fi
