@@ -322,6 +322,17 @@ f_compilesmbclient(){
 
 if [ ! -d /tmp/smbexec-inst ]; then mkdir /tmp/smbexec-inst;fi
 
+# dirty hack to get it to install on boxes other than Kali2
+if [ ! $(grep -i kali /etc/issue) ]; then
+        # apply YG-HT patch for non Kali dists
+	echo -e "\n\e[1;32m[+]\e[0m Looks like we are not on a Kali install, making smbexeclient and winexe work"
+        cd /opt
+        git clone https://github.com/byt3bl33d3r/pth-toolkit.git
+        cd $path/progs/
+        ln -s /opt/pth-toolkit/pth-winexe smbwinexe
+        ln -s /opt/pth-toolkit/pth-smbclient smbexeclient
+fi
+
 if [ -e $path/progs/smbexeclient ]; then
 	echo -e "\n\e[1;32m[+]\e[0m Looks like smbexeclient is already compiled, moving to smbwinexe compilation..."
 	sleep 3
