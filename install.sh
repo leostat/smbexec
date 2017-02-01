@@ -271,7 +271,7 @@ else
 	echo -e "\n\e[1;34m[*]\e[0m Compiling esedbtools..."
 	sleep 2
 	cd /tmp/smbexec-inst/libesedb-20120102/
-	./configure --enable-static-executables && make
+	CFLAGS="-g -O2 -Wall -fgnu89-inline" ./configure --enable-static-executables && make
 	mv /tmp/smbexec-inst/libesedb-20120102/esedbtools /opt/esedbtools
 	cd "$currentpath"
 	if [ -e /opt/esedbtools/esedbexport ] && [ -x /opt/esedbtools/esedbexport ]; then
