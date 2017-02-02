@@ -327,10 +327,18 @@ if [ ! $(grep -i kali /etc/issue) ]; then
         # apply YG-HT patch for non Kali dists
 	echo -e "\n\e[1;32m[+]\e[0m Looks like we are not on a Kali install, making smbexeclient and winexe work"
         cd /opt
+	# get the latest pth-toolkit
         git clone https://github.com/byt3bl33d3r/pth-toolkit.git
-        cd $path/progs/
-        ln -s /opt/pth-toolkit/pth-winexe smbwinexe
-        ln -s /opt/pth-toolkit/pth-smbclient smbexeclient
+	# symlink the library files to be inside "smbexec/lib" so they are accessible for binaries with relative paths hard coded
+	for file in $(ls -l /opt/pth-toolkit/lib/ | grep -v "^d" | awk {'print $9'}); do ln -s /opt/pth-toolkit/lib/$file /opt/smbexec/lib/$file; done
+	# symlink the patched pth-toolkit binaries so they are accessible from everywhere
+	for file in $(ls -l /opt/pth-toolkit/ | grep "pth" | awk {'print $9'}); do sudo ln -s /opt/pth-toolkit/$file /usr/bin/$file; done
+	# symlink the unpatched pth-toolkit bin files so they are accessible for binaries with relative paths hard coded
+	mkdir /opt/smbexec/bin
+	for file in $(ls --color=never -l /opt/pth-toolkit/bin/ | awk {'print $9'}); do echo /usr/bin/$file; sudo ln -s /opt/pth-toolkit/bin/$file /opt/smbexec/bin/$file; done
+        # symlink the below two pth-toolkit patched binaries so they are where smbexec expects them to be
+	ln -s /opt/pth-toolkit/pth-winexe $path/progs/smbwinexe
+        ln -s /opt/pth-toolkit/pth-smbclient $path/progs/smbexeclient
 fi
 
 if [ -e $path/progs/smbexeclient ]; then
