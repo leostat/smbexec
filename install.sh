@@ -332,9 +332,9 @@ if [ ! $(grep -i kali /etc/issue) ]; then
                 git clone https://github.com/byt3bl33d3r/pth-toolkit.git
 	fi
 	# symlink the library files to be inside "smbexec/lib" so they are accessible for binaries with relative paths hard coded
-	for file in $(ls -l /opt/pth-toolkit/lib/ | grep -v "^d" | awk {'print $9'}); do ln -s /opt/pth-toolkit/lib/$file /opt/smbexec/lib/$file; done
+	for file in $(ls --color=never -l /opt/pth-toolkit/lib/ | grep -v "^d" | awk {'print $9'}); do ln -s /opt/pth-toolkit/lib/$file /opt/smbexec/lib/$file; done
 	# symlink the patched pth-toolkit binaries so they are accessible from everywhere
-	for file in $(ls -l /opt/pth-toolkit/ | grep "pth" | awk {'print $9'}); do sudo ln -s /opt/pth-toolkit/$file /usr/bin/$file; done
+	for file in $(ls --color=never -l /opt/pth-toolkit/ | grep "pth" | awk {'print $9'}); do sudo ln -s /opt/pth-toolkit/$file /usr/bin/$file 2>/dev/null; done
 	# symlink the unpatched pth-toolkit bin files so they are accessible for binaries with relative paths hard coded
 	mkdir /opt/smbexec/bin
 	for file in $(ls --color=never -l /opt/pth-toolkit/bin/ | awk {'print $9'}); do sudo ln -s /opt/pth-toolkit/bin/$file /opt/smbexec/bin/$file; done
