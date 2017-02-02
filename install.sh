@@ -260,25 +260,29 @@ f_libesedb(){
 esedbexportinstall=$(locate -l 1 -b "\esedbexport")
 
 if [ ! -z "$esedbexportinstall" ]; then
-	echo -e "\e[1;32m[+]\e[0m I found esedbexport on your system"
+        echo -e "\e[1;32m[+]\e[0m I found esedbexport on your system"
 else
-	update=1
-	echo -e "\n\e[1;34m[*]\e[0m Downloading libesedb from authors google docs drive..."
-	sleep 2
-	wget --no-check-certificate http://pkgs.fedoraproject.org/repo/pkgs/libesedb/libesedb-alpha-20120102.tar.gz/198a30c98ca1b3cb46d10a12bef8deaf/libesedb-alpha-20120102.tar.gz -O /tmp/smbexec-inst/libesedb-alpha-20120102.tar.gz
-	tar -zxf /tmp/smbexec-inst/libesedb-alpha-20120102.tar.gz -C /tmp/smbexec-inst/
-	currentpath=$PWD
-	echo -e "\n\e[1;34m[*]\e[0m Compiling esedbtools..."
-	sleep 2
-	cd /tmp/smbexec-inst/libesedb-20120102/
-	CFLAGS="-g -O2 -Wall -fgnu89-inline" ./configure --enable-static-executables && make
-	mv /tmp/smbexec-inst/libesedb-20120102/esedbtools /opt/esedbtools
-	cd "$currentpath"
-	if [ -e /opt/esedbtools/esedbexport ] && [ -x /opt/esedbtools/esedbexport ]; then
-		echo -e "\n\e[1;32m[+]\e[0m esedbtools have been installed..."
-	else
-		echo -e "\e[1;31m[!]\e[0m esedbtools didn't install properly. You may need to do it manually"
-	fi
+        update=1
+        echo -e "\n\e[1;34m[*]\e[0m Downloading libesedb from authors Fedora repo..."
+        sleep 2
+        # download the source into directory and extract
+        mkdir dependancies
+        wget --no-check-certificate http://pkgs.fedoraproject.org/repo/pkgs/libesedb/libesedb-alpha-20120102.tar.gz/198a30c98ca1b3cb46d10a12bef8deaf/libesedb-alpha-20120102.tar.gz -O dependancies/libesedb-alpha-20120102.tar.gz
+        tar -zxf dependancies/libesedb-alpha-20120102.tar.gz -C dependancies/
+        # compile esedb
+        currentpath=$PWD
+        echo -e "\n\e[1;34m[*]\e[0m Compiling esedbtools..."
+        sleep 2
+        cd dependancies/libesedb-20120102/
+        CFLAGS="-g -O2 -Wall -fgnu89-inline" ./configure --enable-static-executables && make
+        # mv source to expected location
+        cd "$currentpath"
+        mv dependancies/libesedb-20120102/esedbtools /opt/esedbtools
+        if [ -e /opt/esedbtools/esedbexport ] && [ -x /opt/esedbtools/esedbexport ]; then
+                echo -e "\n\e[1;32m[+]\e[0m esedbtools have been installed..."
+        else
+                echo -e "\e[1;31m[!]\e[0m esedbtools didn't install properly. You may need to do it manually"
+        fi
 fi
 }
 
