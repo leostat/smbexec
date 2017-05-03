@@ -243,9 +243,7 @@ if [ ! -z "$NTDSXtractinstall" ]; then
 else
 	echo -e "\n\e[1;34m[*]\e[0m Downloading NTDSXTRACT from ntdsxtract.com..."
 	sleep 2
-	wget http://www.ntdsxtract.com/downloads/ntdsxtract/ntdsxtract_v1_0.zip -O /tmp/smbexec-inst/ntdsxtract_v1_0.zip
-	unzip /tmp/smbexec-inst/ntdsxtract_v1_0.zip -d /tmp/smbexec-inst/
-	mv /tmp/smbexec-inst/NTDSXtract\ 1.0 /opt/NTDSXtract
+	git clone https://github.com/csababarta/ntdsxtract.git /opt/NTDSXtract/
 	if [ -e /opt/NTDSXtract/dsusers.py ]; then
 		echo -e "\n\e[1;32m[+]\e[0m NTDSXtract has been installed..."
 	else
