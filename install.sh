@@ -5,7 +5,6 @@
 ##################################################
 
 f_debian(){
-	clear
 	f_Banner
 	f_install
 
@@ -86,7 +85,6 @@ rm -rf /tmp/smbexec-inst/
 
 ##################################################
 f_rhfedora(){
-	clear
 	f_Banner
 	f_install
 
@@ -148,7 +146,6 @@ rm -rf /tmp/smbexec-inst/
 
 ##################################################
 f_microsoft(){
-	clear
 	f_Banner
 	echo "Seriously!?!?! smbexec doesn't run on Windows!!!"
 	echo -e "You need to learn you some Linux!\nHere's some links...\n"
@@ -255,7 +252,9 @@ fi
 
 ##################################################
 f_libesedb(){
-esedbexportinstall=$(locate -l 1 -b "\esedbexport")
+
+# Ignore esedb from the non clean build enviroment
+esedbexportinstall=$(locate -l 1 -b "\esedbexport" | grep -v build/Development)
 
 if [ ! -z "$esedbexportinstall" ]; then
         echo -e "\e[1;32m[+]\e[0m I found esedbexport on your system"
@@ -325,7 +324,8 @@ f_compilesmbclient(){
 if [ ! -d /tmp/smbexec-inst ]; then mkdir /tmp/smbexec-inst;fi
 
 # dirty hack to get it to install on boxes other than Kali2
-if [ ! $(grep -i kali /etc/issue) ]; then
+
+if [ ! "$(grep -i kali /etc/issue)" ]; then
         # apply YG-HT patch for non Kali dists
 	echo -e "\n\e[1;32m[+]\e[0m Looks like we are not on a Kali install, making smbexeclient and winexe work"
         cd /opt
@@ -385,6 +385,15 @@ else
 		if [ ! -d /tmp/smbexec-inst/samba ]; then tar -zxf $path/sources/samba.tar.gz -C /tmp/smbexec-inst/ > /dev/null 2>&1; fi
 	echo -e "\n\e[1;34m[*]\e[0m Compiling smbwinexe, this may take a while..."
 	sleep 2
+	# execfile doesnt exist in py3, so moving to py : may be needed in future so leaving
+	#sed s/python3/python2/g -i /tmp/winexe-waf/samba/third_party/waf/waflib/Scripting.py
+
+	#defined(@array) syntax no longer valid, so removing check
+	# https://perldoc.perl.org/5.8.8/functions/defined.html
+	# Many other retired functions are called, but these are the only fatal ones it seems
+
+	sed 's/if (defined(@$podl))/if (@$podl)/g' -i  /tmp/smbexec-inst/samba/pidl/lib/Parse/Pidl/ODL.pm
+	sed 's/defined @$pidl/#defined @$pidl/g' -i /tmp/smbexec-inst/samba/pidl/pidl
 	cd /tmp/smbexec-inst/winexe/source && ./waf -j8 configure --samba-dir=../../samba  && ./waf -j8
 	cp /tmp/smbexec-inst/winexe/source/build/winexe-static $path/progs/smbwinexe
 	cd $path
@@ -429,7 +438,6 @@ echo
 ##################################################
 f_mainmenu(){
 
-clear
 f_Banner
 	echo "Please choose your OS to install smbexec"
 	echo "1.  Debian/Ubuntu and derivatives"
@@ -445,7 +453,7 @@ f_Banner
 	2) f_rhfedora ;;
 	3) f_microsoft ;;
 	4) f_compilebinaries ;;
-	*) clear;exit ;;
+	*) exit ;;
 	esac
 
 }
@@ -458,10 +466,10 @@ echo "Updatedb: may take a few seconds"
 updatedb;
 echo "done;"
 
-while getopts "h?vdu:" opt; do
+while getopts "h?vdus" opt; do
 	case "$opt" in
 		h|\?) 
-			show_usage
+			echo
 			;;
 		v)
 			show_version
@@ -472,21 +480,27 @@ while getopts "h?vdu:" opt; do
 		u)
 			noninteract=1
 			;;
+		s)
+			sourceonly=1
 	esac
 done
 
 f_interread(){
- # This suppreses requests for user inout if u is set 
-if [ -z $noninteract]; then
-  read;
+# This suppreses requests for user input if u is set, allows for build in new live iso / dpkg 
+if [ -z $noninteract ]; then
+ read
 else
- echo;
+ echo
 fi 
 }
+if [ -z $sourceonly ]; then
 
-if [-z noninteract]; then
-	if_mainmenu;
-else 
-	f_debian;
-	f_compilebinaries;
+	if [ -z $noninteract ]; then
+		f_mainmenu;
+	else 
+		f_debian;
+		f_compilebinaries;
+	fi
+else
+	echo "Sourced Funtions for debugging"
 fi
